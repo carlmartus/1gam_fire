@@ -6,7 +6,14 @@ var loadCount = 0; // Load resources
 var resBackground; // Game background
 
 var lastFrame;
+var startClock;
+var nextSpawn;
 var walkers;
+var mouseX = 300;
+var mouseY = 200;
+var playerSize = 16;
+
+var backMargin = 150;
 
 // }}}
 // Classes {{{
@@ -46,6 +53,15 @@ Walker.prototype.render = function() {
 	con.fillRect(x, y, this._size, this._size);
 }
 
+Walker.prototype.hit = function(rect) {
+	var x0 = this._x;
+	var y0 = this._y;
+	var x1 = this._x + this._size;
+	var y1 = this._y + this._size;
+	return
+		rect.x0 < x1;
+}
+
 // }}}
 // Gameplay {{{
 
@@ -55,6 +71,24 @@ function init() {
 		var w = new Walker();
 		walkers = walkers.concat(w);
 	}
+
+	startClock = Date.now();
+	nextSpawn = startClock + 2000;
+}
+
+function playerHit() {
+	var px0 = mouseX - (playerSize >> 1);
+	var py0 = mouseY - (playerSize >> 1);
+	var rect = {
+		x0 : px0,
+		y0 : py0,
+		x1 : px0 + playerSize,
+		y1 : py0 + playerSize,
+	};
+	for (var i=0; i<walkers.length; i++) {
+		if (walkers[i].hit(rect)) return true;
+	}
+	return false;
 }
 
 function frame() {
@@ -62,9 +96,30 @@ function frame() {
 	var fr = (current - lastFrame)*0.001;
 	lastFrame = current;
 
+	// Check spawn
+	if (current > nextSpawn) {
+		nextSpawn += 1000;
+		walkers = walkers.concat(new Walker);
+		walkers = walkers.concat(new Walker);
+		walkers = walkers.concat(new Walker);
+	}
+
 	if (fr > 0.4) return; // Lag
 
+	if (playerHit()) {
+		console.log('HIT');
+	} else {
+		console.log('MISS');
+	}
+
+	// Render
 	con.drawImage(resBackground, 0, 0);
+
+	con.fillStyle = '#0f0';
+	con.fillRect(
+			mouseX-(playerSize>>1),
+			mouseY-(playerSize>>1),
+			playerSize, playerSize);
 
 	for (var i=0; i<walkers.length; i++) {
 		walkers[i].frame(fr);
@@ -114,6 +169,17 @@ function drawLoadscreen() {
 	con.fillText('Downloading ' + loadCount + ' files', 260, 220);
 }
 
+function mouseEvent(event) {
+	var rect = can.getBoundingClientRect();
+	mouseX = event.clientX - rect.left;
+	mouseY = event.clientY - rect.top;
+
+	if (mouseX < backMargin) mouseX = backMargin;
+	if (mouseY < backMargin) mouseY = backMargin;
+	if (mouseX > can.width  - backMargin) mouseX = can.width  - backMargin;
+	if (mouseY > can.height - backMargin) mouseY = can.height - backMargin;
+}
+
 function gameStart() {
 	requestAnimationFrame =
 		window.requestAnimationFrame ||
@@ -123,6 +189,7 @@ function gameStart() {
 
 	can = document.getElementById("gamecanvas");
 	con = can.getContext("2d");
+	can.addEventListener('mousemove', mouseEvent, false);
 
 	resBackground = downloadImage("background.jpg");
 	drawLoadscreen();
