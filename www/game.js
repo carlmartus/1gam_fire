@@ -62,6 +62,8 @@ function frame() {
 	var fr = (current - lastFrame)*0.001;
 	lastFrame = current;
 
+	if (fr > 0.4) return; // Lag
+
 	con.drawImage(resBackground, 0, 0);
 
 	for (var i=0; i<walkers.length; i++) {
