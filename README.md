@@ -1,4 +1,7 @@
-1gam_fire
-=========
+Fire hazard
+===========
 
-One game a month: Fire
+#1GAM Agust.
+
+Avoid the fire! Control by moving the mouse.
+
