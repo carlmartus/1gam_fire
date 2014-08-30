@@ -8,12 +8,12 @@ var resBackground; // Game background
 var lastFrame;
 var startClock;
 var nextSpawn;
-var walkers;
+var walkers; // Array of walkers
 var mouseX = 300;
 var mouseY = 200;
 var playerSize = 16;
 
-var backMargin = 150;
+var backMargin = 16;
 
 // }}}
 // Classes {{{
@@ -58,8 +58,13 @@ Walker.prototype.hit = function(rect) {
 	var y0 = this._y;
 	var x1 = this._x + this._size;
 	var y1 = this._y + this._size;
-	return
-		rect.x0 < x1;
+	var inside =
+		rect.x0 < x1 &&
+		rect.x1 > x0 &&
+		rect.y0 < y1 &&
+		rect.y1 > y0;
+
+	return inside;
 }
 
 // }}}
@@ -91,6 +96,19 @@ function playerHit() {
 	return false;
 }
 
+function gameOverFrame() {
+	var current = Date.now();
+
+	con.fillStyle = 'rgba(0, 0, 0, 0.5)';
+	con.fillRect(0, 0, can.width, can.height);
+	con.fillStyle = '#fff';
+	con.font = '16px Ariel';
+
+	var score = Math.round((current - startClock)*0.01);
+	con.fillText('Score: ' + score, 280, 210);
+	con.fillText('Refresh page or click restart button', 170, 300);
+}
+
 function frame() {
 	var current = Date.now();
 	var fr = (current - lastFrame)*0.001;
@@ -106,12 +124,6 @@ function frame() {
 
 	if (fr > 0.4) return; // Lag
 
-	if (playerHit()) {
-		console.log('HIT');
-	} else {
-		console.log('MISS');
-	}
-
 	// Render
 	con.drawImage(resBackground, 0, 0);
 
@@ -124,6 +136,11 @@ function frame() {
 	for (var i=0; i<walkers.length; i++) {
 		walkers[i].frame(fr);
 		walkers[i].render();
+	}
+
+	if (playerHit()) {
+		requestAnimationFrame(gameOverFrame);
+		return;
 	}
 
 	requestAnimationFrame(frame);
