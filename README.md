@@ -10,3 +10,5 @@ Click [here](http://martus.se/1gam/carlmartus/firewalker/) to play game
 
 ![Screenshot](screenshot.png)
 
+One game a month page: [here](http://www.onegameamonth.com/carlmartus).
+
