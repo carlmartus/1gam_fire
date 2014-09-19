@@ -21,8 +21,13 @@ var backMargin = 16;
 function Walker() {
 	this._size = 16;
 	this._speed = 80.0;
-	this._x = Math.random()*(can.width - this._size);
-	this._y = Math.random()*(can.height - this._size);
+	this._influence = 100;
+	do {
+		this._x = Math.random()*(can.width - this._size);
+		this._y = Math.random()*(can.height - this._size);
+	} while (
+			Math.abs((this._x) - mouseX) < this._influence ||
+			Math.abs((this._y) - mouseY) < this._influence);
 	var angle = Math.random()*6.5;
 	this._dx = Math.cos(angle)*this._speed;
 	this._dy = Math.sin(angle)*this._speed;
@@ -188,6 +193,7 @@ function drawLoadscreen() {
 
 function mouseEvent(event) {
 	var rect = can.getBoundingClientRect();
+	console.log(can.width);
 	mouseX = event.clientX - rect.left;
 	mouseY = event.clientY - rect.top;
 
